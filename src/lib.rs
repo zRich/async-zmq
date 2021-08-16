@@ -4,7 +4,7 @@ pub use message::*;
 
 
 #[allow(unused_imports)]
-use zmq::{Context, Error, Socket, Socket, SocketEvent, SocketType};
+use zmq::{Context, Error, Socket, SocketEvent, SocketType};
 
 use futures;
 
@@ -26,7 +26,7 @@ type ZmqSocketType = SocketType;
 
 type ZmqError = zmq::Error;
 
-type ZmqResult = Result<T, ZmqError>;
+type ZmqResult<T> = Result<T, ZmqError>;
 
 pub struct ZmqContext {
     ctx: zmq::Context,
@@ -39,7 +39,7 @@ impl ZmqContext {
         }
     }
 
-    pub fn Socket(&self, socket_type: ZmqSocketType) -> Result<ZmqSocket> {
+    pub fn Socket(&self, socket_type: ZmqSocketType) -> Result<ZmqSocket, ZmqError> {
         self.Socket(socket_type)
     }
 }
@@ -56,13 +56,12 @@ impl ZmqSocket {
 }
 
 pub trait ZmqEvent {
+    fn r#do(&mut self) -> ZmqResult<()>;
 }
-
-
 pub trait ZmqSend {
-    async fn send(&mut self, message: ZmqMessage) -> ZmqResult<()>;
+    fn send(&mut self, message: ZmqMessage) -> ZmqResult<()>;
  }
 
  pub trait ZmqRecv {
-    async fn recv(&mut self) -> ZmqResult<ZmqMessage>;
+    fn recv(&mut self) -> ZmqResult<ZmqMessage>;
  }

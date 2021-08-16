@@ -1,3 +1,3 @@
-struct ZmqMessage {
+pub struct ZmqMessage {
     
 }
