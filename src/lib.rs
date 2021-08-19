@@ -1,32 +1,31 @@
 mod message;
+mod error;
+mod req;
 
 pub use message::*;
-
+use async_trait::async_trait;
 
 #[allow(unused_imports)]
 use zmq::{Context, Error, Socket, SocketEvent, SocketType};
 
-use futures;
+use error::{ZmqError, ZmqResult};
 
-type ZmqSocketType = SocketType;
-// pub enum ZmqSocketType {
-//     PAIR,
-//     PUB,
-//     SUB,
-//     REQ,
-//     REP,
-//     DEALER,
-//     ROUTER,
-//     PULL,
-//     PUSH,
-//     XPUB,
-//     XSUB,
-//     STREAM,
-// }
+use futures::{self, Future};
 
-type ZmqError = zmq::Error;
-
-type ZmqResult<T> = Result<T, ZmqError>;
+pub enum ZmqSocketType {
+    PAIR = SocketType::PAIR,
+    PUB = SocketType::PUB,
+    SUB = SocketType::SUB,
+    REQ = SocketType::REQ,
+    REP = SocketType::REP,
+    DEALER = SocketType::DEALER,
+    ROUTER = SocketType::ROUTER,
+    PULL = SocketType::PULL,
+    PUSH = SocketType::PUSH,
+    XPUB = SocketType::XPUB,
+    XSUB = SocketType::XSUB,
+    STREAM = SocketType::STREAM,
+}
 
 pub struct ZmqContext {
     ctx: zmq::Context,
@@ -39,7 +38,7 @@ impl ZmqContext {
         }
     }
 
-    pub fn Socket(&self, socket_type: ZmqSocketType) -> Result<ZmqSocket, ZmqError> {
+    pub fn Socket(&self, socket_type: ZmqSocketType) -> ZmqResult<()> {
         self.Socket(socket_type)
     }
 }
@@ -55,13 +54,28 @@ impl ZmqSocket {
     }
 }
 
-pub trait ZmqEvent {
-    fn r#do(&mut self) -> ZmqResult<()>;
+pub trait Sendable {
+    fn send(self, socket: &ZmqSocket, flags: i32) -> ZmqResult<()>;
 }
+
+impl<T> Sendable for T
+where 
+    T: Into<ZmqMessage>,
+{
+    fn send(self, socket: &ZmqSocket, flags: i32) -> ZmqResult<()> {
+        let mut msg: ZmqMessage = self.into();
+
+    }
+}
+
+
+
+#[async_trait]
 pub trait ZmqSend {
-    fn send(&mut self, message: ZmqMessage) -> ZmqResult<()>;
+    async fn send(&mut self, message: ZmqMessage); 
  }
 
+#[async_trait]
  pub trait ZmqRecv {
-    fn recv(&mut self) -> ZmqResult<ZmqMessage>;
+    async fn recv(&mut self) -> ZmqResult<ZmqMessage>;
  }
