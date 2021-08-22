@@ -1,0 +1,28 @@
+[package]
+name = "zmq-sys"
+version = "0.11.0"
+authors = [
+    "a.rottmann@gmx.at",
+    "erick.tryzelaar@gmail.com",
+]
+license = "MIT/Apache-2.0"
+description = "Low-level bindings to the zeromq library"
+keywords = ["ffi", "bindings"]
+categories = ["external-ffi-bindings"]
+repository = "https://github.com/erickt/rust-zmq"
+build = "build/main.rs"
+links = "zmq"
+
+[features]
+# Build libzmq from source.
+vendored = ['zeromq-src']
+
+[dependencies]
+libc = "0.2.15"
+
+[build-dependencies]
+metadeps = "1"
+zeromq-src = { version = "0.1.7", optional = true }
+
+[package.metadata.pkg-config]
+libzmq = "4.1"
