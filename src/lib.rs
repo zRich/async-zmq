@@ -2,15 +2,17 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-include!(concat!(env!("OUT_DIR"), "/libzmq.rs"));
+include!(concat!(env!("OUT_DIR"), "/zmq.rs"));
 
-#![allow(trivial_numeric_casts)]
-mod error;
-mod message;
-mod socket;
+// #![allow(trivial_numeric_casts)]
+pub mod error;
+// mod message;
+// mod socket;
+pub mod zmq;
+pub mod ctx;
 
 use bitflags::bitflags;
-use error::{errno_to_error, ZmqError};
+// use error::{errno_to_error, ZmqError};
 
 use libc::{c_int, c_long, c_short};
 
@@ -27,55 +29,19 @@ use std::string::FromUtf8Error;
 use std::sync::Arc;
 use std::{mem, ptr, str};
 
-use zmq_sys::{errno, RawFd};
 
-#[macro_export]
-macro_rules! zmq_try {
-    ($($tt:tt)*) => {{
-        let rc = $($tt)*;
-        if rc == -1 {
-            return Err(errno_to_error());
-        }
-        rc
-    }}
-}
-
+pub type ZmqError = u32;
 pub type ZmqResult<T> = result::Result<T, ZmqError>;
 
-struct RawContext {
-    raw: *mut c_void,
-}
+// use zmq_sys::{errno, RawFd};
 
-impl RawContext {
-    fn term(&self) -> ZmqResult<()> {
-        zmq_try!(unsafe { zmq_sys::zmq_ctx_term(self.raw) });
-        Ok(())
-    }
-}
-
-//这两个trait有什么用？
-unsafe impl Send for RawContext {}
-unsafe impl Sync for RawContext {}
-
-impl Drop for RawContext {
-    fn drop(&mut self) {
-        let mut e = self.term();
-        while e == Err(ZmqError::EINTR) {
-            e = self.term();
-        }
-    }
-}
-
-struct ZmqContext {
-    raw: Arc<RawContext>,
-}
-
-impl ZmqContext {
-    pub fn new() -> Self {
-        Self {
-            raw: Arc::new(RawContext {
-                raw: unsafe { zmq_sys::zmq_ctx_new() },
-            }),
-        }
-    }
-}
+// #[macro_export]
+// macro_rules! zmq_try {
+//     ($($tt:tt)*) => {{
+//         let rc = $($tt)*;
+//         if rc == -1 {
+//             return Err(errno_to_error());
+//         }
+//         rc
+//     }}
+// }
