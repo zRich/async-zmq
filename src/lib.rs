@@ -1,10 +1,10 @@
 #![allow(trivial_numeric_casts)]
 mod error;
-mod socket;
 mod message;
+mod socket;
 
 use bitflags::bitflags;
-use error::{ZmqError, errno_to_error};
+use error::{errno_to_error, ZmqError};
 
 use libc::{c_int, c_long, c_short};
 
@@ -50,7 +50,6 @@ impl RawContext {
 //这两个trait有什么用？
 unsafe impl Send for RawContext {}
 unsafe impl Sync for RawContext {}
-
 
 impl Drop for RawContext {
     fn drop(&mut self) {
