@@ -7,13 +7,12 @@ fn main() {
     println!("cargo:rustc-link-lib=libzmq");
 
     let bindings = bindgen::Builder::default()
-        .header("wrapper.h")
+        .header("libzmq.h")
         .generate()
-        .expect("Unable to generate bindings");
+        .expect("Unable to generate libzmq.rs");
 
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
-    let out_path = PathBuf::from("./");
     bindings
         .write_to_file(out_path.join("libzmq.rs"))
-        .expect("Couldn't write bindings!");
+        .expect("Couldn't write libzmq.rs!");
 }
