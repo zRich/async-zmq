@@ -14,6 +14,7 @@ pub mod ctx;
 use bitflags::bitflags;
 // use error::{errno_to_error, ZmqError};
 
+use error::ZmqError;
 use libc::{c_int, c_long, c_short};
 
 use std::ffi;
@@ -30,7 +31,7 @@ use std::sync::Arc;
 use std::{mem, ptr, str};
 
 
-pub type ZmqError = u32;
+// pub type ZmqError = u32;
 pub type ZmqResult<T> = result::Result<T, ZmqError>;
 
 // use zmq_sys::{errno, RawFd};

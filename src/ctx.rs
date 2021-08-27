@@ -10,14 +10,15 @@ extern crate libc;
 use crate::error::ZmqError;
 use crate::{zmq, ZmqResult};
 
+use std::error::Error;
 use std::ffi;
-use std::fmt::{Error, Result};
+use std::fmt::{Result};
 use std::ops::Drop;
-use std::os::raw::c_void as void;
+use std::os::raw::c_void;
 use std::sync::Arc;
 
 pub struct RawPointer {
-    pub rptr: *mut void,
+    pub rptr: *mut c_void,
 }
 
 pub struct ZmqContext {
@@ -37,7 +38,7 @@ impl ZmqContext {
         }
     }
 
-    pub fn term(&mut self) -> std::result::Result<(), std::io::Error> {
+    pub fn term(&mut self) -> ZmqResult<()> {
         unsafe {
             // let Some(r) = self.raw.
             zmq::zmq_ctx_term(self.raw.rptr)
@@ -58,22 +59,13 @@ impl ZmqContext {
 
 impl Drop for ZmqContext {
     fn drop(&mut self) {
-        unsafe {
-            // let Some(r) = self.raw.
-            zmq::zmq_ctx_term(self.raw.rptr)
-        };
+        let mut rc = self.term();
+        while rc == Err(ZmqError::EINTR) {
+            rc = self.term();
+        }
     }
 }
-// pub enum ZmqContextOptions {
-//     ZMQ_IO_THREADS = zmq::ZMQ_IO_THREADS,
-//     ZMQ_MAX_SOCKETS = zmq::ZMQ_MAX_SOCKETS,
-//     ZMQ_MAX_MSGSZ = zmq::ZMQ_MAX_MSGSZ,
-//     ZMQ_ZERO_COPY_RCV = zmq::ZMQ_ZERO_COPY_RCV,
-//     ZMQ_SOCKET_LIMIT = zmq::ZMQ_SOCKET_LIMIT,
-//     ZMQ_IPV6 = zmq::ZMQ_IPV6,
-//     ZMQ_BLOCKY = zmq::ZMQ_BLOCKY,
-//     ZMQ_THREAD_SCHED_POLICY = zmq::ZMQ_THREAD_SCHED_POLICY,
-//     ZMQ_THREAD_PRIORITY = zmq::ZMQ_THREAD_PRIORITY,
-//     ZMQ_THREAD_NAME_PREFIX = zmq::ZMQ_THREAD_NAME_PREFIX,
-//     ZMQ_MSG_T_SIZE = zmq::ZMQ_MSG_T_SIZE,
+
+// impl From for  {
+    
 // }
