@@ -7,12 +7,9 @@
 // zmq_ctx_term - terminate a 0MQ context
 ///
 extern crate libc;
-use crate::error::ZmqError;
-use crate::{zmq, ZmqResult};
+use crate::error::{ZmqError, ZmqResult};
+use crate::{zmq};
 
-use std::error::Error;
-use std::ffi;
-use std::fmt::{Result};
 use std::ops::Drop;
 use std::os::raw::c_void;
 use std::sync::Arc;
@@ -41,7 +38,10 @@ impl ZmqContext {
     pub fn term(&mut self) -> ZmqResult<()> {
         unsafe {
             // let Some(r) = self.raw.
-            zmq::zmq_ctx_term(self.raw.rptr)
+            let rc = zmq::zmq_ctx_term(self.raw.rptr);
+            if rc == 0 {
+                return Err(ZmqError::from(rc));
+            }
         };
         Ok(())
     }
@@ -65,7 +65,3 @@ impl Drop for ZmqContext {
         }
     }
 }
-
-// impl From for  {
-    
-// }

@@ -10,39 +10,3 @@ pub mod error;
 // mod socket;
 pub mod zmq;
 pub mod ctx;
-
-use bitflags::bitflags;
-// use error::{errno_to_error, ZmqError};
-
-use error::ZmqError;
-use libc::{c_int, c_long, c_short};
-
-use std::ffi;
-use std::fmt;
-use std::marker::PhantomData;
-use std::os::raw::c_void;
-#[cfg(unix)]
-use std::os::unix::io::{AsRawFd, RawFd as UnixRawFd};
-#[cfg(windows)]
-use std::os::windows::io::{AsRawSocket, RawSocket};
-use std::result;
-use std::string::FromUtf8Error;
-use std::sync::Arc;
-use std::{mem, ptr, str};
-
-
-// pub type ZmqError = u32;
-pub type ZmqResult<T> = result::Result<T, ZmqError>;
-
-// use zmq_sys::{errno, RawFd};
-
-// #[macro_export]
-// macro_rules! zmq_try {
-//     ($($tt:tt)*) => {{
-//         let rc = $($tt)*;
-//         if rc == -1 {
-//             return Err(errno_to_error());
-//         }
-//         rc
-//     }}
-// }

@@ -1,21 +1,27 @@
 use crate::zmq;
-// pub type ZmqError = u32;
 
-use std::{self, ffi::{self, CStr}, mem, str, io::{Error, ErrorKind}};
-// use std::result::Result;
+use std::convert::{From};
+use std::result;
+use std::{
+    self,
+    ffi::{CStr},
+    str,
+};
 
-#[derive(Clone, Copy)]
+pub type ZmqResult<T> = result::Result<T, ZmqError>;
+
+
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub enum ZmqError {
-    EFAULT =  zmq::EFAULT as isize,  //invalid ctx
-    EINTR =  zmq::EINTR as isize,  //term ctx failed, try again.
+    EFAULT = zmq::EFAULT as isize, //invalid ctx
+    EINTR = zmq::EINTR as isize,   //term ctx failed, try again.
 }
 
 impl ZmqError {
     pub fn err_no(self) -> i32 {
-        let _no = 
-        match self {
-            EFAULT => zmq::EFAULT,
-            EFAULT => zmq::EFAULT,
+        let _no = match self {
+            ZmqError::EFAULT => zmq::EFAULT,
+            ZmqError::EINTR => zmq::EINTR,
         };
 
         _no as i32
@@ -29,23 +35,7 @@ impl ZmqError {
             // std::ffi::CStr::from_ptr(msg).to_string_lossy().into_owned().as_str()  //to be tested
             // let v: &'static [u8] = mem::transmute(ffi::CStr::from_ptr(msg).to_bytes());
             // str::from_utf8(v).unwrap()
-        }        
-    }
-
-    pub fn from_raw(error: i32) ->Self {
-        match error as u32 {
-            zmq::EINTR => ZmqError::EINTR,
-            zmq::EINVAL => ZmqError::EFAULT,
         }
-    }
-
-    pub fn into_raw(error: ZmqError) -> Error {
-        let kind = match error {
-            ZmqError::EINTR => ErrorKind::Interrupted,
-            ZmqError::EFAULT => ErrorKind::InvalidInput,  //invalid ctx
-        };
-
-        Error::new(kind, error)
     }
 }
 
@@ -66,22 +56,13 @@ impl std::fmt::Display for ZmqError {
     }
 }
 
-impl From<ZmqError> for Error {
-    fn from(error: ZmqError) -> Self {
-        let kind = match error {
-            ZmqError::EINTR => ErrorKind::Interrupted,
-            ZmqError::EFAULT => ErrorKind::InvalidInput,  //invalid ctx
-        };
+impl From<i32> for ZmqError {
+    fn from(error: i32) -> Self {
+        match error as u32 {
+            zmq::EINTR => ZmqError::EINTR,
+            zmq::EINVAL => ZmqError::EFAULT,
 
-        Error::new(kind, error)
+            _other => panic!("unknown error {}", _other),
+        }
     }
 }
-
-// impl From<Error> for ZmqError {
-//     fn from(error: Error) -> Self {
-//         match error {
-//             EFAULT => Error::new(ErrorKind::Interrupted, EFAULT),
-//             EFAULT => Error::new(ErrorKind::InvalidInput, EFAULT),  //invalid ctx
-//         }
-//     }
-// }
