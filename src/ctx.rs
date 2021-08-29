@@ -8,16 +8,20 @@
 ///
 extern crate libc;
 use crate::error::{ZmqError, ZmqResult};
-use crate::{zmq};
+use crate::socket::{ZmqSocket, ZmqSocketType};
 
+use crate::zmq;
+
+use std::convert::Into;
 use std::ops::Drop;
 use std::os::raw::c_void;
 use std::sync::Arc;
 
+#[derive(Debug)]
 pub struct RawPointer {
     pub rptr: *mut c_void,
 }
-
+#[derive(Clone, Debug)]
 pub struct ZmqContext {
     raw: Arc<RawPointer>,
 }
@@ -37,7 +41,6 @@ impl ZmqContext {
 
     pub fn term(&mut self) -> ZmqResult<()> {
         unsafe {
-            // let Some(r) = self.raw.
             let rc = zmq::zmq_ctx_term(self.raw.rptr);
             if rc == 0 {
                 return Err(ZmqError::from(rc));
@@ -55,6 +58,19 @@ impl ZmqContext {
         unsafe { zmq::zmq_ctx_set(self.raw.rptr, zmq::ZMQ_IO_THREADS as _, value as i32) };
         Ok(())
     }
+
+    pub fn socket(&self, socket_type: ZmqSocketType) -> ZmqResult<ZmqSocket> {
+        let socket = unsafe { zmq::zmq_socket(self.raw.rptr, socket_type.into()) };
+
+        if socket.is_null() {
+            return Err(ZmqError::from(unsafe { zmq::zmq_errno() }));
+        }
+
+        Ok(ZmqSocket {
+            raw: socket,
+            ctx: Some(self.clone()),
+        })
+    }
 }
 
 impl Drop for ZmqContext {
@@ -63,5 +79,11 @@ impl Drop for ZmqContext {
         while rc == Err(ZmqError::EINTR) {
             rc = self.term();
         }
+    }
+}
+
+impl Into<*mut c_void> for ZmqContext {
+    fn into(self) -> *mut c_void {
+        self.raw.rptr
     }
 }

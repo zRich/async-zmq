@@ -7,6 +7,6 @@ include!(concat!(env!("OUT_DIR"), "/zmq.rs"));
 // #![allow(trivial_numeric_casts)]
 pub mod error;
 // mod message;
-// mod socket;
+pub mod socket;
 pub mod zmq;
 pub mod ctx;
