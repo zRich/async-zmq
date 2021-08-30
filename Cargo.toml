@@ -14,5 +14,5 @@ futures = "0.3.16"
 libc = "0.2.99"
 
 [build-dependencies]
-bindgen = "*"
+bindgen = "0.59.1"
 
