@@ -21,7 +21,7 @@ pub(crate) fn main() {
 
     for n in 0..10 {
         println!("Sending Hello {}...", n);
-        sock.send( "Hello".into(), 0).unwrap();
+        sock.send( ZmqMessage::from("Hello"), 0).unwrap();
 
         sock.recv(&mut msg, 0).unwrap();
         println!("Received world {}: {}", msg.as_str().unwrap(), n);

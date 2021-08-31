@@ -10,12 +10,15 @@ use zmq::{
 use std::thread;
 use std::time::Duration;
 
-pub(crate) fn main() {
+fn main() {
     let ctx = ZmqContext::new();
-
+    println!("ctx created");
     let sock = ZmqSocket::new(ctx, ZmqSocketType::ZMQ_REP);
+    println!("socket created");
 
+    
     assert!(sock.bind("tcp://*:5555").is_ok());
+    println!("Socket bound at {}","tcp://*:5555");
 
     let mut msg = ZmqMessage::new();
 

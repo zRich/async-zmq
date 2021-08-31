@@ -1,6 +1,6 @@
 extern crate bindgen;
 
-use std::{env, path::{Path, PathBuf}};
+use std::path::PathBuf;
 
 fn main() {
     println!("cargo:rustc-link-lib=zmq");
