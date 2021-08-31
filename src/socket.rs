@@ -1,6 +1,7 @@
 use crate::ctx::ZmqContext;
 use crate::error::{ZmqError, ZmqResult};
 
+use crate::message::ZmqMessage;
 use crate::zmq;
 
 use std::convert::{From, Into};
@@ -116,6 +117,31 @@ impl ZmqSocket {
     //send_multipart
     //recv
     //zmq_recv
+
+    pub fn send(&self, msg: ZmqMessage, flags: i32) -> ZmqResult<()> {
+        let rc = unsafe {
+            let mut data = msg.raw;
+            zmq::zmq_msg_send(&mut data, self.raw, flags)
+        };
+
+        if rc == -1 {
+            panic!("{}", ZmqError::from(unsafe { zmq::zmq_errno() }))
+        }
+
+        Ok(())
+    }
+
+    pub fn recv(&self, msg: &mut ZmqMessage, flags: i32) -> ZmqResult<()> {
+        let rc = unsafe {
+            zmq::zmq_msg_recv(&mut msg.raw, self.raw, flags)
+        };
+
+        if rc == -1 {
+            panic!("{}", ZmqError::from(unsafe { zmq::zmq_errno() }))
+        }
+
+        Ok(())
+    }
 }
 
 impl Drop for ZmqSocket {

@@ -1,9 +1,11 @@
 extern crate bindgen;
 
-use std::path::PathBuf;
+use std::{env, path::{Path, PathBuf}};
 
 fn main() {
-    println!("cargo:rustc-link-lib=libzmq");
+    println!("cargo:rustc-link-lib=zmq");
+    println!("cargo:rustc-link-search=all={}", "/usr/local/lib");
+    // println!("cargo:include={}", "/usr/local/include");
 
     let bindings = bindgen::Builder::default()
         .header("libzmq.h")

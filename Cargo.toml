@@ -1,5 +1,5 @@
 [package]
-name = "async-zmq"
+name = "zmq"
 version = "0.1.0"
 edition = "2018"
 
@@ -16,3 +16,10 @@ libc = "0.2.99"
 [build-dependencies]
 bindgen = "0.59.1"
 
+[[example]]
+name = "req_serv"
+path = "examples/req_rep/req/main.rs"
+
+[[example]]
+name = "rep_client"
+path = "examples/req_rep/rep/main.rs"

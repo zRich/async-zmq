@@ -18,6 +18,7 @@
 use crate::error::{ZmqError, ZmqResult};
 use crate::zmq::{self, size_t};
 
+use std::ffi::{CStr, CString};
 use std::{
     fmt::{Debug, Display},
     ops::{Deref, DerefMut},
@@ -49,7 +50,7 @@ impl ZmqMessage {
         str::from_utf8(self).ok()
     }
 
-    pub fn gets<'a>(&'a mut self, property: i32) -> ZmqResult<i32> {
+    pub fn get<'a>(&'a mut self, property: i32) -> ZmqResult<i32> {
         unsafe {
             let rc = zmq::zmq_msg_get(&self.raw, property);
             if rc == -1 {
@@ -59,9 +60,15 @@ impl ZmqMessage {
         }
     }
 
-    // pub fn gets<'a>(&'a mut self, prop: &str) -> Option<&'a str> {
-
-    // }
+    pub fn gets<'a>(&'a mut self, property: &str) -> Option<&'a str> {
+        let _prop = CString::new(property.as_bytes()).unwrap();
+        let _value = unsafe { zmq::zmq_msg_gets(&self.raw, _prop.as_ptr()) };
+        if _value.is_null() {
+            None
+        } else {
+            str::from_utf8(unsafe { CStr::from_ptr(_value) }.to_bytes()).ok()
+        }
+    }
 }
 
 impl<'a> From<&'a [u8]> for ZmqMessage {
@@ -71,6 +78,24 @@ impl<'a> From<&'a [u8]> for ZmqMessage {
             ptr::copy_nonoverlapping(data.as_ptr(), msg.as_mut_ptr(), data.len());
             msg
         }
+    }
+}
+
+impl<'a> From<&'a String> for ZmqMessage {
+    fn from(data: &'a String) -> Self {
+        Self::from(data.as_bytes())
+    }
+}
+
+impl<'a> From<&'a str> for ZmqMessage {
+    fn from(data: &'a str) -> Self {
+        Self::from(data.as_bytes())
+    }
+}
+
+impl From<Vec<u8>> for ZmqMessage{
+    fn from(data: Vec<u8>) -> Self {
+        Self::from(data.as_slice())
     }
 }
 
