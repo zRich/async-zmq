@@ -17,9 +17,9 @@ libc = "0.2.99"
 bindgen = "0.59.1"
 
 [[example]]
-name = "req_serv"
-path = "examples/req_rep/req/main.rs"
+name = "rep_serv"
+path = "examples/req_rep/rep/main.rs"
 
 [[example]]
-name = "rep_client"
-path = "examples/req_rep/rep/main.rs"
+name = "req_client"
+path = "examples/req_rep/req/main.rs"

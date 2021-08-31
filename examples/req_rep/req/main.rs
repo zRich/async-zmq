@@ -1,4 +1,4 @@
-#![crate_name = "req_serv"]
+#![crate_name = "req_client"]
 
 use zmq::{
     ctx::{ZmqContext},
@@ -13,16 +13,17 @@ use std::time::Duration;
 pub(crate) fn main() {
     let ctx = ZmqContext::new();
 
-    let sock = ZmqSocket::new(ctx, ZmqSocketType::ZMQ_REP);
+    let sock = ZmqSocket::new(ctx, ZmqSocketType::ZMQ_REQ);
 
-    assert!(sock.bind("tcp://*:5555").is_ok());
+    assert!(sock.bind("tcp://localhost:5555").is_ok());
 
     let mut msg = ZmqMessage::new();
 
-    loop {
+    for n in 0..10 {
+        println!("Sending Hello {}...", n);
+        sock.send( "Hello".into(), 0).unwrap();
+
         sock.recv(&mut msg, 0).unwrap();
-        println!("Received {}", msg.as_str().unwrap());
-        thread::sleep(Duration::from_millis(1000));
-        sock.send("World".into(), 0).unwrap();
+        println!("Received world {}: {}", msg.as_str().unwrap(), n);
     }
 }
