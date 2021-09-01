@@ -53,8 +53,7 @@ pub struct ZmqSocket {
 
 impl ZmqSocket {
     pub fn new(ctx: ZmqContext, socket_type: ZmqSocketType) -> Self {
-        let socket = ctx.socket(socket_type);
-        socket.unwrap()
+        ctx.socket(socket_type).unwrap()
     }
 
     pub fn into(&self) -> *mut c_void {

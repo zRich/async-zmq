@@ -14,6 +14,7 @@ fn main() {
     let ctx = ZmqContext::new();
     println!("ctx created");
     let sock = ZmqSocket::new(ctx, ZmqSocketType::ZMQ_REP);
+    // let sock = ctx.socket(ZmqSocketType::ZMQ_REP).unwrap();
     println!("socket created");
 
     

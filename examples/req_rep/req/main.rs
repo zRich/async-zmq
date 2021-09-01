@@ -14,6 +14,7 @@ pub(crate) fn main() {
     let ctx = ZmqContext::new();
 
     let sock = ZmqSocket::new(ctx, ZmqSocketType::ZMQ_REQ);
+    // let sock = ctx.socket(ZmqSocketType::ZMQ_REQ);
 
     assert!(sock.bind("tcp://localhost:5555").is_ok());
 
