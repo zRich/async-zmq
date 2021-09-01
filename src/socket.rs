@@ -52,7 +52,7 @@ pub struct ZmqSocket {
 }
 
 impl ZmqSocket {
-    pub fn new(ctx: ZmqContext, socket_type: ZmqSocketType) -> Self {
+    pub fn new(ctx: &ZmqContext, socket_type: ZmqSocketType) -> Self {
         ctx.socket(socket_type).unwrap()
     }
 
