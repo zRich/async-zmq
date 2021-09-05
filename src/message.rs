@@ -50,6 +50,13 @@ impl ZmqMessage {
         str::from_utf8(self).ok()
     }
 
+    pub fn as_bytes(&self) -> Option<Vec<u8>> {
+        // let m = vec![];
+        // self.as_str().iter().map(|b | *b as u8).collect::<Vec<_>>();
+        let m = self.as_str().unwrap().as_bytes().to_vec();
+        Some(m)
+    }
+
     pub fn get<'a>(&'a mut self, property: i32) -> ZmqResult<i32> {
         unsafe {
             let rc = zmq::zmq_msg_get(&self.raw, property);
@@ -93,9 +100,16 @@ impl<'a> From<&'a str> for ZmqMessage {
     }
 }
 
-impl From<Vec<u8>> for ZmqMessage{
+impl From<Vec<u8>> for ZmqMessage {
     fn from(data: Vec<u8>) -> Self {
         Self::from(data.as_slice())
+    }
+}
+
+impl Into<Vec<u8>> for ZmqMessage {
+    fn into(self) -> Vec<u8> {
+        // self.as_bytes().unwrap()
+        self.as_str().unwrap().as_bytes().to_vec()
     }
 }
 

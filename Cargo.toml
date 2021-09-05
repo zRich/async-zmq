@@ -12,14 +12,23 @@ bitflags = "1.3.2"
 bytes = "1.0.1"
 futures = "0.3.16"
 libc = "0.2.99"
+rand = "0.8.4"
 
 [build-dependencies]
 bindgen = "0.59.1"
 
 [[example]]
-name = "rep_serv"
-path = "examples/req_rep/rep/main.rs"
+name = "helloworld_server"
+path = "examples/ch01/helloworld_server/main.rs"
 
 [[example]]
-name = "req_client"
-path = "examples/req_rep/req/main.rs"
+name = "helloworld_client"
+path = "examples/ch01/helloworld_client/main.rs"
+
+[[example]]
+name = "wuserver"
+path = "examples/ch01/wuserver/main.rs"
+
+[[example]]
+name = "wuclient"
+path = "examples/ch01/wuclient/main.rs"
