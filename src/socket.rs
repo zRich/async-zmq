@@ -2,11 +2,11 @@ use crate::ctx::ZmqContext;
 use crate::error::{ZmqError, ZmqResult};
 
 use crate::message::ZmqMessage;
-use crate::zmq;
+use crate::zmq::{self, size_t};
 
 use std::convert::{From, Into};
 use std::ffi::CString;
-use std::os::raw::{c_int, c_void};
+use std::os::raw::{c_int, c_void, c_uint};
 
 #[allow(non_camel_case_types)]
 pub enum ZmqSocketType {
@@ -140,6 +140,14 @@ impl ZmqSocket {
         }
 
         Ok(())
+    }
+
+    pub fn setOption<'a>(&mut self, option: c_uint, value: &'a [u8]) -> i32 {
+        unsafe {
+            zmq::zmq_setsockopt(self.raw, 
+                option as i32, value.as_ptr() as *const c_void, 
+                value.len() as size_t)
+        }
     }
 }
 

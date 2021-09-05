@@ -10,16 +10,19 @@ use zmq::{
 
 fn main() {
     let ctx = ZmqContext::new();
-    let sock = ZmqSocket::new(&ctx, ZmqSocketType::ZMQ_SUB);
+    let mut sock = ZmqSocket::new(&ctx, ZmqSocketType::ZMQ_SUB);
     
     println!("Connecting Weather update server...");
 
     assert!(sock.connect("tcp://localhost:5556").is_ok());
 
+    sock.setOption(zmq::ZMQ_SUBSCRIBE, "10001".as_bytes());
+
+
     let mut msg = ZmqMessage::new();
 
     let mut total_temp = 0;
-    for update_nbr in 0..10 {
+    for update_nbr in 0..100 {
 
         sock.send("Hello".into(), 0);
 
