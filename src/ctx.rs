@@ -42,7 +42,7 @@ impl ZmqContext {
     pub fn term(&mut self) -> ZmqResult<()> {
         unsafe {
             let rc = zmq::zmq_ctx_term(self.raw.rptr);
-            if rc == 0 {
+            if rc != 0 {
                 return Err(ZmqError::from(rc));
             }
         };
