@@ -23,11 +23,13 @@ fn main() {
     let mut msg = ZmqMessage::new();
 
     loop {
-        receiver.recv(&mut msg, 0);
+        receiver.recv(&mut msg, 0).unwrap();
+
+        println!("Message = {:?}", msg.as_bytes().unwrap());
 
         sleep(Duration::from_millis(1000));
 
-        sender.send("".into(), 0);
-        println!("{}", msg);
+        sender.send("".into(), 0).unwrap();
+        println!("{:?}", msg.as_bytes().unwrap());
     }
 }

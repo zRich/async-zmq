@@ -12,23 +12,25 @@ fn main() {
 
     let receiver = ZmqSocket::new(&ctx, ZmqSocketType::ZMQ_PULL);
 
-    receiver.bind("tcp://*:5558");
+    assert!(receiver.bind("tcp://*:5558").is_ok());
 
     let mut msg = ZmqMessage::new();
-    receiver.recv(&mut msg, 0);
+    receiver.recv(&mut msg, 0).unwrap();
 
     let start_time = Instant::now();
     for i in 0..100 {
-        receiver.recv(&mut msg, 0);
+        receiver.recv(&mut msg, 0).unwrap();
         if i % 10 == 0 {
             print!(":");
         } else {
             print!(".");
         }
 
-        println!("{}", String::from(msg.as_bytes()));
+        println!("Message {} = {:?}", i, msg.as_bytes().unwrap());
     }
 
+    drop(receiver);
+    
     let end_time = Instant::now();
 
     let difference = end_time.duration_since(start_time).as_millis();
