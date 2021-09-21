@@ -1,4 +1,8 @@
-use zmq::{ctx::ZmqContext, message::ZmqMessage, socket::ZmqSocket};
+use zmq::{
+    ctx::ZmqContext,
+    message::ZmqMessage,
+    socket::{ZmqSocket, ZmqSocketType},
+};
 
 use std::thread::sleep;
 use std::time::Duration;
@@ -6,13 +10,13 @@ use std::time::Duration;
 fn main() {
     let ctx = ZmqContext::new();
 
-    let receiver = ZmqSocket::new(&ctx, zmq::socket::ZmqSocketType::ZMQ_PULL);
+    let receiver = ZmqSocket::new(&ctx, ZmqSocketType::ZMQ_PULL);
 
-    receiver.bind("tcp://localhost:5557");
+    assert!(receiver.connect("tcp://localhost:5557").is_ok());
 
-    let sender = ZmqSocket::new(&ctx, zmq::socket::ZmqSocketType::ZMQ_PUSH);
+    let sender = ZmqSocket::new(&ctx, ZmqSocketType::ZMQ_PUSH);
 
-    sender.connect("tcp://localhost:5558");
+    assert!(sender.connect("tcp://localhost:5558").is_ok());
 
     sender.send("0".into(), 0).unwrap();
 

@@ -1,4 +1,8 @@
-use zmq::{ctx::ZmqContext, message::ZmqMessage, socket::ZmqSocket};
+use zmq::{
+    ctx::ZmqContext,
+    message::ZmqMessage,
+    socket::{ZmqSocket, ZmqSocketType},
+};
 
 use std::thread::sleep;
 use std::time::{Duration, Instant, SystemTime};
@@ -6,17 +10,12 @@ use std::time::{Duration, Instant, SystemTime};
 fn main() {
     let ctx = ZmqContext::new();
 
-    let receiver = ZmqSocket::new(&ctx, zmq::socket::ZmqSocketType::ZMQ_PULL);
+    let receiver = ZmqSocket::new(&ctx, ZmqSocketType::ZMQ_PULL);
 
-    receiver.bind("tcp://localhost:5558");
-
-    let sender = ZmqSocket::new(&ctx, zmq::socket::ZmqSocketType::ZMQ_PUSH);
-
-    sender.connect("tcp://localhost:5558");
-
-    sender.send("0".into(), 0).unwrap();
+    receiver.bind("tcp://*:5558");
 
     let mut msg = ZmqMessage::new();
+    receiver.recv(&mut msg, 0);
 
     let start_time = Instant::now();
     for i in 0..100 {
@@ -26,6 +25,8 @@ fn main() {
         } else {
             print!(".");
         }
+
+        println!("{}", String::from(msg.as_bytes()));
     }
 
     let end_time = Instant::now();
