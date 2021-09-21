@@ -24,7 +24,7 @@ fn main() {
     let mut total_temp = 0;
     for update_nbr in 0..100 {
 
-        sock.send("Hello".into(), 0);
+        // sock.send(ZmqMessage::from("Hello"), 0);
 
         sock.recv(&mut msg, 0).unwrap();
         let update = String::from_utf8(msg.as_bytes().unwrap()).unwrap();
