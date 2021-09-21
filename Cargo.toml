@@ -32,3 +32,19 @@ path = "examples/ch01/wuserver/main.rs"
 [[example]]
 name = "wuclient"
 path = "examples/ch01/wuclient/main.rs"
+
+[[example]]
+name = "version"
+path = "examples/ch01/version/main.rs"
+
+[[example]]
+name = "taskvent"
+path = "examples/ch01/taskvent/main.rs"
+
+[[example]]
+name = "taskwork"
+path = "examples/ch01/taskwork/main.rs"
+
+[[example]]
+name = "tasksink"
+path = "examples/ch01/tasksink/main.rs"
