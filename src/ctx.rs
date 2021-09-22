@@ -57,15 +57,15 @@ impl ZmqContext {
         }
     }
 
-    pub fn term(&mut self) -> ZmqResult<()> {
-        unsafe {
-            let rc = zmq::zmq_ctx_term(self.raw.rptr);
-            if rc != 0 {
-                return Err(ZmqError::from(rc));
-            }
-        };
-        Ok(())
-    }
+    // pub fn term(&mut self) -> ZmqResult<()> {
+    //     unsafe {
+    //         let rc = zmq::zmq_ctx_term(self.raw.rptr);
+    //         if rc != 0 {
+    //             return Err(ZmqError::from(rc));
+    //         }
+    //     };
+    //     Ok(())
+    // }
 
     pub fn get_io_threads(&self) -> ZmqResult<i32> {
         let rc = unsafe { zmq::zmq_ctx_get(self.raw.rptr, zmq::ZMQ_IO_THREADS as _) };
