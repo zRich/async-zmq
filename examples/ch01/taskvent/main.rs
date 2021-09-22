@@ -33,7 +33,7 @@ fn main() {
         let workload = rng.gen_range(1..100);
 
         total_msec += workload;
-        sink.send(format!("{}", workload).as_bytes().into(), 0)
+        sender.send(format!("{}", workload).as_bytes().into(), 0)
             .unwrap();
     }
 

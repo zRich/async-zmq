@@ -25,11 +25,13 @@ fn main() {
     loop {
         receiver.recv(&mut msg, 0).unwrap();
 
-        println!("Message = {:?}", msg.as_bytes().unwrap());
+        let msec: u64 = msg.as_str().unwrap().parse().unwrap();
 
-        sleep(Duration::from_millis(1000));
+        // println!("Message = {:?}", msec);
+
+        sleep(Duration::from_millis(msec));
 
         sender.send("".into(), 0).unwrap();
-        println!("{:?}", msg.as_bytes().unwrap());
+        // println!("{:?}", msg.as_bytes().unwrap());
     }
 }
