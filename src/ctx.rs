@@ -13,6 +13,7 @@ use crate::socket::{ZmqSocket, ZmqSocketType};
 use crate::zmq;
 
 use std::convert::Into;
+use std::fmt::Result;
 use std::ops::Drop;
 use std::os::raw::c_void;
 use std::sync::Arc;
@@ -24,6 +25,23 @@ pub struct RawPointer {
 #[derive(Clone, Debug)]
 pub struct ZmqContext {
     raw: Arc<RawPointer>,
+}
+
+impl RawPointer {
+    pub fn term(&self) -> ZmqResult<()> {
+        unsafe {
+            zmq::zmq_ctx_term(self.rptr);
+        }
+        Ok(())
+    }
+}
+impl Drop for RawPointer {
+    fn drop(&mut self) {
+        let mut rc = self.term();
+        while rc == Err(ZmqError::EINTR) {
+            rc = self.term();
+        }
+    }
 }
 
 unsafe impl Send for ZmqContext {}
@@ -73,14 +91,14 @@ impl ZmqContext {
     }
 }
 
-impl Drop for ZmqContext {
-    fn drop(&mut self) {
-        let mut rc = self.term();
-        while rc == Err(ZmqError::EINTR) {
-            rc = self.term();
-        }
-    }
-}
+// impl Drop for ZmqContext {
+//     fn drop(&mut self) {
+//         let mut rc = self.term();
+//         while rc == Err(ZmqError::EINTR) {
+//             rc = self.term();
+//         }
+//     }
+// }
 
 impl Into<*mut c_void> for ZmqContext {
     fn into(self) -> *mut c_void {

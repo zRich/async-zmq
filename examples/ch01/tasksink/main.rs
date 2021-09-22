@@ -4,8 +4,8 @@ use zmq::{
     socket::{ZmqSocket, ZmqSocketType},
 };
 
-use std::thread::sleep;
-use std::time::{Duration, Instant, SystemTime};
+// use std::thread::sleep;
+use std::time::{Duration, Instant};
 
 fn main() {
     let ctx = ZmqContext::new();
@@ -29,7 +29,7 @@ fn main() {
         println!("Message {} = {:?}", i, msg.as_bytes().unwrap());
     }
 
-    drop(receiver);
+    // drop(receiver);
     
     let end_time = Instant::now();
 
