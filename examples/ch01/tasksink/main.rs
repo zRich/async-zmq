@@ -26,7 +26,6 @@ fn main() {
             print!(".");
         }
 
-        // println!("Message {} = {:?}", i, msg.as_bytes().unwrap());
     }
 
     // drop(receiver);
