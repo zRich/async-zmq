@@ -48,3 +48,23 @@ path = "examples/ch01/taskwork/main.rs"
 [[example]]
 name = "tasksink"
 path = "examples/ch01/tasksink/main.rs"
+
+[[example]]
+name = "msreader"
+path = "examples/ch02/msreader/main.rs"
+
+[[example]]
+name = "mspoller"
+path = "examples/ch02/mspoller/main.rs"
+
+[[example]]
+name = "rrclient"
+path = "examples/ch02/rrclient/main.rs"
+
+[[example]]
+name = "rrworker"
+path = "examples/ch02/rrworker/main.rs"
+
+[[example]]
+name = "rrbroker"
+path = "examples/ch02/rrbroker/main.rs"

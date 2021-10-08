@@ -2,11 +2,15 @@ use crate::ctx::ZmqContext;
 use crate::error::{ZmqError, ZmqResult};
 
 use crate::message::ZmqMessage;
-use crate::zmq::{self, size_t};
+use crate::zmq::{self, size_t, *};
 
 use std::convert::{From, Into};
 use std::ffi::CString;
-use std::os::raw::{c_int, c_void, c_uint};
+use std::marker::PhantomData;
+use std::os::raw::{c_int, c_long, c_short, c_uint, c_void};
+use std::ptr::null_mut;
+
+use bitflags::bitflags;
 
 #[allow(non_camel_case_types)]
 pub enum ZmqSocketType {
@@ -131,9 +135,7 @@ impl ZmqSocket {
     }
 
     pub fn recv(&self, msg: &mut ZmqMessage, flags: i32) -> ZmqResult<()> {
-        let rc = unsafe {
-            zmq::zmq_msg_recv(&mut msg.raw, self.raw, flags)
-        };
+        let rc = unsafe { zmq::zmq_msg_recv(&mut msg.raw, self.raw, flags) };
 
         if rc == -1 {
             panic!("{}", ZmqError::from(unsafe { zmq::zmq_errno() }))
@@ -144,9 +146,22 @@ impl ZmqSocket {
 
     pub fn setOption<'a>(&mut self, option: c_uint, value: &'a [u8]) -> i32 {
         unsafe {
-            zmq::zmq_setsockopt(self.raw, 
-                option as i32, value.as_ptr() as *const c_void, 
-                value.len() as size_t)
+            zmq::zmq_setsockopt(
+                self.raw,
+                option as i32,
+                value.as_ptr() as *const c_void,
+                value.len() as size_t,
+            )
+        }
+    }
+
+    pub fn to_zmq_poll_item(&self, events: ZmqPollEvent) -> ZmqPollItem {
+        ZmqPollItem {
+            socket: self.raw,
+            fd: 0,
+            events: events.bits(),
+            revents: 0,
+            _marker: PhantomData,
         }
     }
 }
@@ -178,6 +193,132 @@ pub enum ZmqSocketEvent {
     ZMQ_EVENT_HANDSHAKE_SUCCEEDED = zmq::ZMQ_EVENT_HANDSHAKE_SUCCEEDED as isize,
     ZMQ_EVENT_HANDSHAKE_FAILED_PROTOCOL = zmq::ZMQ_EVENT_HANDSHAKE_FAILED_PROTOCOL as isize,
     ZMQ_EVENT_HANDSHAKE_FAILED_AUTH = zmq::ZMQ_EVENT_HANDSHAKE_FAILED_AUTH as isize,
+}
+
+// 直接使用option的常量定义吧，把option定义成enum画蛇添足
+// ///definions on http://api.zeromq.org/master:zmq-setsockopt
+// ///not all options defined
+// #[allow(non_camel_case_types)]
+// pub enum ZmqSocketOption {
+//     ZMQ_AFFINITY = zmq::ZMQ_AFFINITY as isize,
+//     ZMQ_SUBSCRIBE = zmq::ZMQ_SUBSCRIBE as isize,
+//     ZMQ_BACKLOG = zmq::ZMQ_BACKLOG as isize,
+//     ZMQ_BINDTODEVICE = zmq::ZMQ_BINDTODEVICE as isize,
+//     ZMQ_CONNECT_RID = zmq::ZMQ_CONNECT_RID as isize,
+//     // ZMQ_CONNECT_ROUTING_ID = zmq::ZMQ_CONNECT_ROUTING_ID as isize,
+//     ZMQ_CONFLATE = zmq::ZMQ_CONFLATE as isize,
+//     ZMQ_CONNECT_TIMEOUT = zmq::ZMQ_CONNECT_TIMEOUT as isize,
+//     ZMQ_CURVE_PUBLICKEY = zmq::ZMQ_CURVE_PUBLICKEY as isize,
+//     ZMQ_CURVE_SECRETKEY = zmq::ZMQ_CURVE_SECRETKEY as isize,
+//     ZMQ_CURVE_SERVER = zmq::ZMQ_CURVE_SERVER as isize,
+//     ZMQ_CURVE_SERVERKEY = zmq::ZMQ_CURVE_SERVERKEY as isize,
+//     ZMQ_GSSAPI_PLAINTEXT = zmq::ZMQ_GSSAPI_PLAINTEXT as isize,
+//     ZMQ_GSSAPI_PRINCIPAL = zmq::ZMQ_GSSAPI_PRINCIPAL as isize,
+//     ZMQ_GSSAPI_SERVER = zmq::ZMQ_GSSAPI_SERVER as isize,
+//     ZMQ_GSSAPI_SERVICE_PRINCIPAL = zmq::ZMQ_GSSAPI_SERVICE_PRINCIPAL as isize,
+
+//     ZMQ_GSSAPI_SERVICE_PRINCIPAL_NAMETYPE = zmq::ZMQ_GSSAPI_SERVICE_PRINCIPAL_NAMETYPE as isize,
+//     ZMQ_GSSAPI_PRINCIPAL_NAMETYPE = zmq::ZMQ_GSSAPI_PRINCIPAL_NAMETYPE as isize,
+//     ZMQ_HANDSHAKE_IVL = zmq::ZMQ_HANDSHAKE_IVL as isize,
+//     ZMQ_HEARTBEAT_IVL = zmq::ZMQ_HEARTBEAT_IVL as isize,
+//     ZMQ_HEARTBEAT_TIMEOUT = zmq::ZMQ_HEARTBEAT_TIMEOUT as isize,
+//     ZMQ_HEARTBEAT_TTL = zmq::ZMQ_HEARTBEAT_TTL as isize,
+//     ZMQ_IDENTITY = zmq::ZMQ_IDENTITY as isize,
+//     ZMQ_IMMEDIATE = zmq::ZMQ_IMMEDIATE as isize,
+//     ZMQ_INVERT_MATCHING = zmq::ZMQ_INVERT_MATCHING as isize,
+//     ZMQ_IPV6 = zmq::ZMQ_IPV6 as isize,
+//     ZMQ_LINGER = zmq::ZMQ_LINGER as isize,
+//     ZMQ_MAXMSGSIZE = zmq::ZMQ_MAXMSGSIZE as isize,
+
+//     //
+//     // ZMQ_METADATA = zmq::ZMQ_METADATA as isize,
+//     // ZMQ_MULTICAST_HOPS = zmq::ZMQ_MULTICAST_HOPS as isize,
+//     // ZMQ_MULTICAST_MAXTPDU = zmq::ZMQ_MULTICAST_MAXTPDU as isize,
+//     // ZMQ_PLAIN_PASSWORD = zmq::ZMQ_PLAIN_PASSWORD as isize,
+//     // ZMQ_PLAIN_SERVER = zmq::ZMQ_PLAIN_SERVER as isize,
+//     // ZMQ_PLAIN_USERNAME = zmq::ZMQ_PLAIN_USERNAME as isize,
+// }
+
+/// http://api.zeromq.org/master:zmq-poll
+/// define zmq_poller
+#[repr(C)]
+pub struct ZmqPollItem<'a> {
+    // void //*socket//;
+    // int //fd//;
+    // short //events//;
+    // short //revents//;
+    socket: *mut c_void,
+    fd: c_int,
+    events: c_short,
+    revents: c_short,
+    _marker: PhantomData<&'a ZmqSocket>, //ZmqSocket是对的吗？
+}
+
+pub fn zmq_poll(items: &mut [ZmqPollItem], timeout: i64) -> ZmqResult<i32> {
+    unsafe {
+        let rc = zmq::zmq_poll(
+            items.as_mut_ptr() as *mut zmq::zmq_pollitem_t,
+            items.len() as c_int,
+            timeout as c_long,
+        );
+
+        if rc == -1 {
+            panic!("{}", ZmqError::from(zmq::zmq_errno()))
+        };
+
+        Ok(rc)
+    }
+}
+
+impl<'a> ZmqPollItem<'a> {
+    pub fn from_fd(fd: c_int, events: ZmqPollEvent) -> Self {
+        ZmqPollItem {
+            socket: null_mut(),
+            fd,
+            events: events.bits(),
+            revents: 0,
+            _marker: PhantomData,
+        }
+    }
+
+    pub fn set_events(&mut self, events: ZmqPollEvent) {
+        self.events = events.bits();
+    }
+
+    pub fn get_revents(&self) -> ZmqPollEvent {
+        ZmqPollEvent::from_bits_truncate(self.revents)
+    }
+
+    pub fn is_readable(&self) -> bool {
+        (self.revents & ZmqPollEvent::POLLIN.bits()) != 0
+    }
+
+    pub fn is_writable(&self) -> bool {
+        (self.revents & ZmqPollEvent::POLLOUT.bits()) != 0
+    }
+
+    pub fn is_error(&self) -> bool {
+        (self.revents & ZmqPollEvent::POLLERR.bits()) != 0
+    }
+
+    pub fn has_socket(&self, socket: &ZmqSocket) -> bool {
+        self.socket == socket.raw
+    }
+
+    pub fn has_fd(&self, fd: c_int) -> bool {
+        self.socket.is_null() && self.fd == fd
+    }
+}
+
+///http://api.zeromq.org/master:zmq-poller
+/// define zmq_poller_event_t
+///
+bitflags! {
+    pub struct ZmqPollEvent :i16 {
+        const POLLIN = zmq::ZMQ_POLLIN as i16;
+        const POLLOUT = zmq::ZMQ_POLLOUT as i16;
+        const POLLERR = zmq::ZMQ_POLLERR as i16;
+    }
 }
 
 impl Into<i32> for ZmqSocketEvent {

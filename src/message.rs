@@ -76,6 +76,13 @@ impl ZmqMessage {
             str::from_utf8(unsafe { CStr::from_ptr(_value) }.to_bytes()).ok()
         }
     }
+
+    pub fn get_more(&self) -> bool {
+        unsafe {
+            let rc = zmq::zmq_msg_more(&self.raw);
+            rc != 0
+        }
+    }
 }
 
 impl<'a> From<&'a [u8]> for ZmqMessage {
